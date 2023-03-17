@@ -16,6 +16,7 @@ public class EventHandler {
     private static final Pattern moneyMsg = Pattern.compile("§9§l》 §r§e\\+(?<amount>.*)円§r");
     private static final Pattern announceMsg = Pattern.compile("§9§l》 §r§7§l(?<mcid>.*)§r§7が§r(?<fish>.*)§r§7を釣り上げた！§r");
     private boolean isNextCaughtMoney = false;
+    private static final String colorCodeReg = "§[0-9a-fik-or]";
     public static EventHandler INSTANCE;
     private String latestFish = "";
     private Instant insta = Instant.now();
@@ -33,7 +34,9 @@ public class EventHandler {
         Matcher m = catchMsg.matcher(msg);
         Matcher m2 = announceMsg.matcher(msg);
         if(m2.matches()){
-            if(m2.group("fish").equals(latestFish) && m2.group("mcid").equals(Minecraft.getMinecraft().getSession().getUsername())) {
+            String name = m2.group("fish").replaceAll(colorCodeReg,"");
+            String latestCache = latestFish.replaceAll(colorCodeReg,"");
+            if(name.equals(latestCache) && m2.group("mcid").equals(Minecraft.getMinecraft().getSession().getUsername())) {
                 if(StatsHolder.getFish(latestFish)!=null) {
                     if (!StatsHolder.getFish(latestFish).isBig()) {
                         StatsHolder.getFish(latestFish).setBig(true);
