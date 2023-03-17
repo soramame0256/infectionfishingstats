@@ -10,10 +10,12 @@ import net.minecraft.util.text.TextComponentString;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.time.temporal.TemporalField;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
-import static com.github.soramame0256.infectionfishingstats.StatsHolder.FishType.*;
+import static com.github.soramame0256.infectionfishingstats.StatsHolder.FishType.BIG;
 
 public class StatsHolder {
     private static long total = 0;

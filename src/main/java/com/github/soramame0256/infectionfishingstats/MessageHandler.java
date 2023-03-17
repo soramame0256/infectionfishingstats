@@ -3,7 +3,7 @@ package com.github.soramame0256.infectionfishingstats;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.github.soramame0256.infectionfishingstats.StatsHolder.FishType.*;
+import static com.github.soramame0256.infectionfishingstats.StatsHolder.FishType.OTHER;
 
 public class MessageHandler {
     private static final List<String> otherMsg = new ArrayList<>();

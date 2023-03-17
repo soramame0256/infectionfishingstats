@@ -1,18 +1,15 @@
 package com.github.soramame0256.infectionfishingstats;
 
-import akka.io.Tcp;
-import com.ibm.icu.impl.ICURWLock;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import org.lwjgl.Sys;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.github.soramame0256.infectionfishingstats.StatsHolder.FishType.*;
+import static com.github.soramame0256.infectionfishingstats.StatsHolder.FishType.BIG;
+import static com.github.soramame0256.infectionfishingstats.StatsHolder.FishType.NORMAL;
 
 public class EventHandler {
     private static final Pattern catchMsg = Pattern.compile("§7§l\\[ §r§e§lFishing §r§7§l] §r(?<fish>.*)§r§7を釣り上げた！§r");
