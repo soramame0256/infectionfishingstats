@@ -12,11 +12,11 @@ import static com.github.soramame0256.infectionfishingstats.StatsHolder.FishType
 import static com.github.soramame0256.infectionfishingstats.StatsHolder.FishType.NORMAL;
 
 public class EventHandler {
-    private static final Pattern catchMsg = Pattern.compile("§7§l\\[ §r§e§lFishing §r§7§l] §r(?<fish>.*)§r§7を釣り上げた！§r");
-    private static final Pattern moneyMsg = Pattern.compile("§9§l》 §r§e\\+(?<amount>.*)円§r");
-    private static final Pattern announceMsg = Pattern.compile("§9§l》 §r§7§l(?<mcid>.*)§r§7が§r(?<fish>.*)§r§7を釣り上げた！§r");
+    private static final Pattern CATCH_MSG = Pattern.compile("§7§l\\[ §r§e§lFishing §r§7§l] §r(?<fish>.*)§r§7を釣り上げた！§r");
+    private static final Pattern MONEY_MSG = Pattern.compile("§9§l》 §r§e\\+(?<amount>.*)円§r");
+    private static final Pattern ANNOUNCE_MSG = Pattern.compile("§9§l》 §r§7§l(?<mcid>.*)§r§7が§r(?<fish>.*)§r§7を釣り上げた！§r");
     private boolean isNextCaughtMoney = false;
-    private static final String colorCodeReg = "§[0-9a-fik-or]";
+    public static final String COLOR_CODE_REG = "§[0-9a-fik-or]";
     public static EventHandler INSTANCE;
     private String latestFish = "";
     private Instant insta = Instant.now();
@@ -31,11 +31,11 @@ public class EventHandler {
     @SubscribeEvent
     public void onChatReceived(ClientChatReceivedEvent e) {
         String msg = e.getMessage().getFormattedText();
-        Matcher m = catchMsg.matcher(msg);
-        Matcher m2 = announceMsg.matcher(msg);
+        Matcher m = CATCH_MSG.matcher(msg);
+        Matcher m2 = ANNOUNCE_MSG.matcher(msg);
         if(m2.matches()){
-            String name = m2.group("fish").replaceAll(colorCodeReg,"");
-            String latestCache = latestFish.replaceAll(colorCodeReg,"");
+            String name = m2.group("fish").replaceAll(COLOR_CODE_REG,"");
+            String latestCache = latestFish.replaceAll(COLOR_CODE_REG,"");
             if(name.equals(latestCache) && m2.group("mcid").equals(Minecraft.getMinecraft().getSession().getUsername())) {
                 if(StatsHolder.getFish(latestFish)!=null) {
                     if (!StatsHolder.getFish(latestFish).isBig()) {
@@ -47,7 +47,7 @@ public class EventHandler {
             }
         }
         if(isNextCaughtMoney && insta.getEpochSecond()+1>Instant.now().getEpochSecond()){
-            Matcher m3 = moneyMsg.matcher(msg);
+            Matcher m3 = MONEY_MSG.matcher(msg);
             if(m3.matches()){
                 isNextCaughtMoney=false;
                 StatsHolder.addPrice(latestFish, Integer.parseInt(m3.group("amount")));

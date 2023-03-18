@@ -10,11 +10,11 @@ import net.minecraft.util.text.TextComponentString;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import static com.github.soramame0256.infectionfishingstats.EventHandler.COLOR_CODE_REG;
 import static com.github.soramame0256.infectionfishingstats.StatsHolder.FishType.BIG;
 
 public class StatsHolder {
@@ -70,6 +70,7 @@ public class StatsHolder {
             dTotal = 0;
             dBigCatches = 0;
             dCaughtAmount = 0;
+            dTotalMoney = 0;
         }
     }
     public static void incrementBigCaught(){
@@ -111,6 +112,142 @@ public class StatsHolder {
     public static void addPrice(String name, int price){
         if(fishes.containsKey(name)){
             fishes.get(name).addPrice(price);
+        }
+    }
+    public static List<FishStats> sort(Function<FishStats,? extends Number> c, List<com.github.soramame0256.infectionfishingstats.FishStats> a){
+        FishStats[] t = a.toArray(new FishStats[0]);
+        for(int i=0; i<t.length; i++){
+            int max=i;
+            for(int j=i+1; j<t.length; j++){
+                if(c.apply(t[max]).doubleValue() < c.apply(t[j]).doubleValue()){
+                    max=j;
+                }
+            }
+            if(i!=max){
+                FishStats tmp = t[i];
+                t[i] = t[max];
+                t[max] = tmp;
+            }
+        }
+        return Arrays.stream(t).collect(Collectors.toList());
+    }
+    public static void dumpBySpecific(ICommandSender c,String ty, String sort, int page){
+        if(ty.equals("dic")) {
+            c.sendMessage(new TextComponentString("魚名      | 価格    | キャッチ回数 | 大物か?"));
+            if(sort.equals("none")){
+                for (String s : Arrays.asList(fishes.keySet().toArray(new String[0])).subList((page-1)*10,Math.min(page * 10, fishes.size() - 1))) {
+                    FishStats f = fishes.get(s);
+                    ITextComponent tc = new TextComponentString(f.getName() + "§r | ");
+                    StringBuilder sb = new StringBuilder();
+                    for (Integer i : f.getPrices()) {
+                        sb.append(i.toString()).append(",");
+                    }
+                    sb.append("~");
+                    tc.appendText(sb.toString().replaceAll(",~", ""));
+                    tc.appendText(" | ").appendText(String.valueOf(f.getCount())).appendText(" | ").appendText(String.valueOf(f.isBig()));
+                    c.sendMessage(tc);
+                }
+            }else if(sort.equalsIgnoreCase("name")){
+                String[] keys = fishes.keySet().toArray(new String[0]);
+                for(int i = 0; i<keys.length; i++){
+                    keys[i] = keys[i].replaceAll(COLOR_CODE_REG,"");
+                }
+                Arrays.sort(keys);
+                List<String> st = new ArrayList<>(fishes.keySet());
+                List<String> sorted = new ArrayList<>();
+                for(String s : keys){
+                    String tmp="";
+                    for(String t : st){
+                        if(s.equals(t.replaceAll(COLOR_CODE_REG,""))){
+                            sorted.add(t);
+                            tmp = t;
+                        }
+                    }
+                    st.remove(tmp);
+                }
+                for(String s : sorted.subList((page-1)*10,(Math.min(page * 10, fishes.size() - 1)))){
+                    FishStats f = fishes.get(s);
+                    ITextComponent tc = new TextComponentString(f.getName() + "§r | ");
+                    StringBuilder sb = new StringBuilder();
+                    for (Integer i : f.getPrices()) {
+                        sb.append(i.toString()).append(",");
+                    }
+                    sb.append("~");
+                    tc.appendText(sb.toString().replaceAll(",~", ""));
+                    tc.appendText(" | ").appendText(String.valueOf(f.getCount())).appendText(" | ").appendText(String.valueOf(f.isBig()));
+                    c.sendMessage(tc);
+                }
+            }else if(sort.equalsIgnoreCase("price")){
+                List<FishStats> fishList = new ArrayList<>();
+                for(Map.Entry<String, FishStats> f : fishes.entrySet()){
+                    fishList.add(f.getValue());
+                }
+                for(FishStats s : sort((f)-> {
+                    Optional<Integer> t = f.getPrices().stream().max(Comparator.naturalOrder());
+                    return t.orElse(-1);
+                },fishList).subList((page-1)*10,(Math.min(page * 10, fishes.size() - 1)))){
+                    ITextComponent tc = new TextComponentString(s.getName() + "§r | ");
+                    StringBuilder sb = new StringBuilder();
+                    for (Integer i : s.getPrices()) {
+                        sb.append(i.toString()).append(",");
+                    }
+                    sb.append("~");
+                    tc.appendText(sb.toString().replaceAll(",~", ""));
+                    tc.appendText(" | ").appendText(String.valueOf(s.getCount())).appendText(" | ").appendText(String.valueOf(s.isBig()));
+                    c.sendMessage(tc);
+                }
+            }else if(sort.equalsIgnoreCase("count")){
+                List<FishStats> fishList = new ArrayList<>();
+                for(Map.Entry<String, FishStats> f : fishes.entrySet()){
+                    fishList.add(f.getValue());
+                }
+                for(FishStats s : sort(FishStats::getCount,fishList).subList((page-1)*10,(Math.min(page * 10, fishes.size() - 1)))){
+                    ITextComponent tc = new TextComponentString(s.getName() + "§r | ");
+                    StringBuilder sb = new StringBuilder();
+                    for (Integer i : s.getPrices()) {
+                        sb.append(i.toString()).append(",");
+                    }
+                    sb.append("~");
+                    tc.appendText(sb.toString().replaceAll(",~", ""));
+                    tc.appendText(" | ").appendText(String.valueOf(s.getCount())).appendText(" | ").appendText(String.valueOf(s.isBig()));
+                    c.sendMessage(tc);
+                }
+            }else if(sort.equalsIgnoreCase("big")){
+                List<FishStats> fishList = new ArrayList<>();
+                for(Map.Entry<String, FishStats> f : fishes.entrySet()){
+                    if(f.getValue().isBig()) {
+                        fishList.add(f.getValue());
+                    }
+                }
+                for(Map.Entry<String, FishStats> f : fishes.entrySet()){
+                    if(!f.getValue().isBig()) {
+                        fishList.add(f.getValue());
+                    }
+                }
+                for(FishStats s : fishList.subList((page-1)*10,(Math.min(page * 10, fishes.size() - 1)))){
+                    ITextComponent tc = new TextComponentString(s.getName() + "§r | ");
+                    StringBuilder sb = new StringBuilder();
+                    for (Integer i : s.getPrices()) {
+                        sb.append(i.toString()).append(",");
+                    }
+                    sb.append("~");
+                    tc.appendText(sb.toString().replaceAll(",~", ""));
+                    tc.appendText(" | ").appendText(String.valueOf(s.getCount())).appendText(" | ").appendText(String.valueOf(s.isBig()));
+                    c.sendMessage(tc);
+                }
+            }
+            c.sendMessage(new TextComponentString("                  ページ "+page+"/"+(int)Math.ceil(fishes.size()/10d)));
+        }else if(ty.equals("stat")){
+            c.sendMessage(new TextComponentString("統計      :"));
+            c.sendMessage(new TextComponentString("魚全体    : " + total));
+            c.sendMessage(new TextComponentString("大物釣り  : "+ bigCatches));
+            c.sendMessage(new TextComponentString("釣り回数  : " + caughtAmount));
+            c.sendMessage(new TextComponentString("売却金累計: " + totalMoney + "円"));
+            c.sendMessage(new TextComponentString("本日統計  :"));
+            c.sendMessage(new TextComponentString("魚全体    : " + dTotal));
+            c.sendMessage(new TextComponentString("大物釣り  : "+ dBigCatches));
+            c.sendMessage(new TextComponentString("釣り回数  : " + dCaughtAmount));
+            c.sendMessage(new TextComponentString("売却金累計: " + dTotalMoney + "円"));
         }
     }
     public static void dump(ICommandSender c,String ty){
