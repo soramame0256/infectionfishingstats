@@ -3,7 +3,7 @@
     "modid": "infectionfishingstats",
     "name": "InfectionFishingStats",
     "description": "",
-    "version": "1.2-SNAPSHOT",
+    "version": "1.2-SNAPSHOT-B",
     "mcversion": "${mcversion}",
     "url": "",
     "updateUrl": "",

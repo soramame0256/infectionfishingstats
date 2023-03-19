@@ -1,6 +1,8 @@
 package com.github.soramame0256.infectionfishingstats;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -36,12 +38,15 @@ public class EventHandler {
         if(m2.matches()){
             String name = m2.group("fish").replaceAll(COLOR_CODE_REG,"");
             String latestCache = latestFish.replaceAll(COLOR_CODE_REG,"");
-            if(name.equals(latestCache) && m2.group("mcid").equals(Minecraft.getMinecraft().getSession().getUsername())) {
-                if(StatsHolder.getFish(latestFish)!=null) {
-                    if (!StatsHolder.getFish(latestFish).isBig()) {
-                        StatsHolder.getFish(latestFish).setBig(true);
-                        StatsHolder.incrementBigCaught();
-                        return;
+            if(m2.group("mcid").equals(Minecraft.getMinecraft().getSession().getUsername())) {
+                Minecraft.getMinecraft().player.playSound(new SoundEvent(new ResourceLocation("ui.toast.challenge_complete")), 1f, 0f);
+                if (name.equals(latestCache)) {
+                    if (StatsHolder.getFish(latestFish) != null) {
+                        if (!StatsHolder.getFish(latestFish).isBig()) {
+                            StatsHolder.getFish(latestFish).setBig(true);
+                            StatsHolder.incrementBigCaught();
+                            return;
+                        }
                     }
                 }
             }
